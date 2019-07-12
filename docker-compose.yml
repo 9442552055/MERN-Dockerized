@@ -1,0 +1,42 @@
+version: "2"
+services:
+    client:
+        image: node:11-alpine
+        restart: always
+        ports:
+            - "3000:3000"
+        working_dir: /client/src/app
+        volumes:
+            - ./client:/client/src/app
+        entrypoint: ["npm", "start"]
+        links:
+            - api
+        networks:
+            - webappnetwork
+    api:
+        image:  node:11-alpine
+        restart: always
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./api:/api
+        working_dir: /api
+        depends_on:
+            - mongodb
+        entrypoint: ["sh", "start.sh"]
+        networks:
+            - webappnetwork
+    mongodb:
+        image: mongo
+        restart: always
+        container_name: mongodb
+        volumes:
+            - ./data-node:/data/db
+        ports:
+            - 27017:27017
+        command: mongod --noauth --smallfiles
+        networks:
+            - webappnetwork
+networks:
+    webappnetwork:
+        driver: bridge
